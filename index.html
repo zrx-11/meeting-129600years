@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>12.96万年后 你我还会相遇嘛</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3CradialGradient id='g' cx='35%25' cy='30%25' r='80%25'%3E%3Cstop offset='0%25' stop-color='%23a8c0ff'/%3E%3Cstop offset='55%25' stop-color='%237a5cff'/%3E%3Cstop offset='100%25' stop-color='%232a2350'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='32' cy='32' r='15' fill='url(%23g)'/%3E%3Cellipse cx='32' cy='32' rx='26' ry='8' fill='none' stroke='%23ffd9a0' stroke-width='2.4' transform='rotate(-18 32 32)'/%3E%3Ccircle cx='46' cy='40' r='1.6' fill='%23ffffff'/%3E%3Ccircle cx='18' cy='22' r='1.2' fill='%23c9c2ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@300;400;500&display=swap">
+<style>
+  :root{
+    --bg:#050613;
+    --ink:#f3f0ff;
+    --violet:#8a6bff;
+    --violet-soft:#c9c2ff;
+    --pink:#ff7fc7;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    min-height:100vh;
+    min-height:100svh;
+    background:
+      radial-gradient(120vmax 120vmax at 18% -10%,rgba(42,35,80,.85),transparent 60%),
+      radial-gradient(100vmax 100vmax at 110% 115%,rgba(58,20,70,.75),transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* ===== 背景层 ===== */
+  .sky{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  canvas#dust{position:absolute;inset:0}
+  .nebula{position:absolute;border-radius:50%;filter:blur(70px)}
+  .nebula-1{
+    width:70vmax;height:70vmax;left:-22vmax;top:-18vmax;
+    background:radial-gradient(circle at 35% 40%,rgba(122,92,255,.26),transparent 62%);
+    animation:drift1 56s ease-in-out infinite alternate,pulse1 14s ease-in-out infinite alternate;
+  }
+  .nebula-2{
+    width:64vmax;height:64vmax;right:-24vmax;bottom:-20vmax;
+    background:radial-gradient(circle at 50% 45%,rgba(255,127,199,.14),transparent 60%);
+    animation:drift2 64s ease-in-out infinite alternate,pulse2 18s ease-in-out infinite alternate;
+  }
+  .nebula-3{
+    width:52vmax;height:52vmax;left:30%;top:22%;
+    background:radial-gradient(circle at 50% 50%,rgba(74,107,255,.12),transparent 60%);
+    animation:drift3 72s ease-in-out infinite alternate,pulse1 22s ease-in-out infinite alternate;
+  }
+  @keyframes drift1{from{transform:translate(0,0) scale(1)}to{transform:translate(8vmax,6vmax) scale(1.08)}}
+  @keyframes drift2{from{transform:translate(0,0) scale(1)}to{transform:translate(-7vmax,-5vmax) scale(1.1)}}
+  @keyframes drift3{from{transform:translate(0,0)}to{transform:translate(-5vmax,4vmax)}}
+  @keyframes pulse1{from{opacity:.75}to{opacity:1}}
+  @keyframes pulse2{from{opacity:.7}to{opacity:1}}
+
+  /* ===== 主内容 ===== */
+  main{
+    position:relative;z-index:1;
+    width:min(100%,780px);
+    min-height:100vh;min-height:100svh;
+    margin:0 auto;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:40px 22px;
+    text-align:center;
+  }
+  .player{
+    position:relative;
+    width:min(92vw,640px);
+    border-radius:22px;
+    padding:1px;
+    background:linear-gradient(135deg,rgba(160,120,255,.55),rgba(255,127,199,.35) 45%,rgba(122,92,255,.55));
+    box-shadow:0 0 0 1px rgba(150,130,255,.18),0 0 56px rgba(122,92,255,.22),0 34px 90px rgba(0,0,0,.55);
+  }
+  .player-inner{position:relative;border-radius:21px;overflow:hidden;background:#02030a}
+  video{
+    display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#02030a;
+  }
+  .play-overlay{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(5,6,19,.4);
+    opacity:0;transition:opacity .3s ease;pointer-events:none;
+  }
+  .play-overlay.show{opacity:1}
+  .play-overlay .glyph{
+    width:58px;height:58px;border-radius:50%;
+    background:rgba(243,240,255,.16);
+    border:1px solid rgba(243,240,255,.35);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .play-overlay .glyph svg{margin-left:3px}
+  .pp-btn{
+    position:absolute;right:12px;bottom:12px;z-index:2;
+    width:42px;height:42px;border-radius:50%;
+    border:1px solid rgba(243,240,255,.45);
+    background:rgba(5,6,19,.55);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;color:#f3f0ff;
+    transition:background .2s ease,transform .15s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .pp-btn:active{transform:scale(.92)}
+  .pp-btn .ic-play{display:none;margin-left:2px}
+  .pp-btn.paused .ic-play{display:block}
+  .pp-btn.paused .ic-pause{display:none}
+
+  /* ===== 进度条 ===== */
+  .seekbar{
+    width:min(92vw,640px);
+    margin-top:14px;
+    height:16px;border-radius:8px;
+    position:relative;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:none;
+  }
+  .seekbar .track{
+    position:absolute;left:0;right:0;top:6.5px;height:3px;border-radius:2px;
+    background:rgba(201,194,255,.22);
+  }
+  .seekbar .fill{
+    position:absolute;left:0;top:6.5px;height:3px;border-radius:2px;
+    background:linear-gradient(90deg,rgba(160,120,255,.75),rgba(255,127,199,.75));
+    width:0%;
+  }
+  .seekbar .knob{
+    position:absolute;top:4px;width:8px;height:8px;border-radius:50%;
+    background:#f3f0ff;box-shadow:0 0 8px rgba(160,120,255,.8);
+    transform:translateX(-50%);left:0%;display:none;
+  }
+  .seekbar:hover .knob,.seekbar.drag .knob{display:block}
+  .seekbar .time{
+    position:absolute;right:0;top:-18px;
+    font-size:11px;letter-spacing:.08em;color:var(--muted);opacity:.85;
+  }
+  h1{
+    margin-top:30px;
+    font-family:'Noto Serif SC','Songti SC','SimSun',serif;
+    font-weight:900;line-height:1.22;
+  }
+  .t-line1{
+    display:block;
+    font-size:clamp(1.35rem,4.8vw,2.15rem);
+    font-weight:600;
+    letter-spacing:.42em;text-indent:.42em;
+    color:var(--violet-soft);
+    margin-bottom:14px;
+  }
+  .t-line2{
+    display:block;
+    font-size:clamp(2.55rem,9.4vw,5.6rem);
+    letter-spacing:.06em;
+    color:var(--ink);
+    text-shadow:0 0 26px rgba(160,120,255,.5),0 0 84px rgba(122,92,255,.28);
+  }
+
+  /* ===== 音乐开关 ===== */
+  .music-btn{
+    position:fixed;right:16px;bottom:16px;z-index:2;
+    display:flex;align-items:center;gap:8px;
+    padding:12px 18px;border-radius:999px;
+    border:1px solid rgba(160,130,255,.45);
+    background:rgba(10,9,28,.72);
+    color:#f3f0ff;font-size:14px;letter-spacing:.06em;
+    cursor:pointer;
+    box-shadow:0 8px 26px rgba(0,0,0,.5),0 0 22px rgba(122,92,255,.28);
+    animation:guide 2.4s ease-in-out infinite;
+    transition:background .2s ease,transform .15s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .music-btn:active{transform:scale(.95)}
+  @keyframes guide{0%,100%{box-shadow:0 8px 26px rgba(0,0,0,.5),0 0 14px rgba(122,92,255,.2)}50%{box-shadow:0 8px 26px rgba(0,0,0,.5),0 0 34px rgba(122,92,255,.5)}}
+  .music-btn .eq{display:none;gap:2px;align-items:flex-end;height:14px}
+  .music-btn .eq i{width:3px;border-radius:2px;background:#c9c2ff;animation:eqbar 1s ease-in-out infinite}
+  .music-btn .eq i:nth-child(1){height:7px;animation-delay:-.3s}
+  .music-btn .eq i:nth-child(2){height:13px;animation-delay:-.6s}
+  .music-btn .eq i:nth-child(3){height:9px;animation-delay:-.15s}
+  .music-btn.playing{background:rgba(122,92,255,.4);border-color:rgba(201,194,255,.7);animation:none}
+  .music-btn.playing .eq{display:flex}
+  .music-btn.playing .ic-note{display:none}
+  @keyframes eqbar{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1)}}
+</style>
+</head>
+<body>
+  <div class="sky" aria-hidden="true">
+    <canvas id="dust"></canvas>
+    <div class="nebula nebula-1"></div>
+    <div class="nebula nebula-2"></div>
+    <div class="nebula nebula-3"></div>
+  </div>
+
+  <main>
+    <div class="player">
+      <div class="player-inner">
+        <video id="film" autoplay muted loop playsinline
+          poster="https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/Y2n5b1rKKokh9Tx17IVcEsUqnMb"
+          src="https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/M90IbwuTBo8r8Hx0vBYcQgkjnYe"></video>
+        <div class="play-overlay" id="playOverlay">
+          <span class="glyph">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="#f3f0ff"/></svg>
+          </span>
+        </div>
+        <button class="pp-btn" id="ppBtn" aria-label="暂停" aria-pressed="true">
+          <svg class="ic-pause" width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.4v14H7zM13.6 5H17v14h-3.4z" fill="#f3f0ff"/></svg>
+          <svg class="ic-play" width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="#f3f0ff"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="seekbar" id="seekbar" role="slider" aria-label="视频进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="track"></div>
+      <div class="fill" id="seekFill"></div>
+      <div class="knob" id="seekKnob"></div>
+      <span class="time" id="seekTime">0.0 / 0.0s</span>
+    </div>
+
+    <h1>
+      <span class="t-line1">12.96万年后</span>
+      <span class="t-line2">你我还会相遇嘛</span>
+    </h1>
+  </main>
+
+  <audio id="bgm" loop preload="auto"
+    src="https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/X5s7bE7k0oFqqXxRu9OcQiPbnyc"></audio>
+
+  <button class="music-btn" id="musicBtn" aria-label="开启音乐">
+    <svg class="ic-note" width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17.5V6.2c0-.5.3-.9.8-1l8-1.7c.7-.15 1.4.4 1.4 1.1v11.1" fill="none" stroke="#f3f0ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6.5" cy="17.5" r="2.5" fill="none" stroke="#f3f0ff" stroke-width="1.8"/><circle cx="16.5" cy="17.5" r="2.5" fill="none" stroke="#f3f0ff" stroke-width="1.8"/></svg>
+    <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span id="musicLabel">开启音乐</span>
+  </button>
+
+<script>
+(function(){
+  /* ===== 星尘：缓缓流动的星海 ===== */
+  var canvas = document.getElementById('dust');
+  var ctx = canvas.getContext('2d');
+  var dust = [];
+  var meteors = [];
+  var COLORS = ['#ffffff','#e8ecff','#ffd9a0','#c9c2ff','#ffffff','#ffffff'];
+
+  function resize(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    buildDust();
+  }
+  function buildDust(){
+    var count = Math.min(170, Math.floor(canvas.width*canvas.height/5200));
+    dust = [];
+    for(var i=0;i<count;i++){ dust.push(newDust(true)); }
+  }
+  function newDust(anywhere){
+    var near = Math.random()<0.35;
+    return {
+      x: Math.random()*canvas.width,
+      y: Math.random()*canvas.height,
+      r: anywhere ? 0.7+Math.random()*1.8 : 0.7,
+      sp: (0.03+Math.random()*0.09) * (near?1.9:1),
+      ang: -Math.PI/2.4 + (Math.random()*0.5-0.25),
+      base: 0.3+Math.random()*0.6,
+      tw: 0.4+Math.random()*1.5,
+      phase: Math.random()*Math.PI*2,
+      color: COLORS[(Math.random()*COLORS.length)|0]
+    };
+  }
+  function draw(t){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for(var i=0;i<dust.length;i++){
+      var s = dust[i];
+      s.x = (s.x + Math.cos(s.ang)*s.sp) % canvas.width;
+      s.y = (s.y + Math.sin(s.ang)*s.sp) % canvas.height;
+      if(s.x < 0) s.x += canvas.width;
+      if(s.y < 0) s.y += canvas.height;
+      var a = s.base * (0.5 + 0.5*Math.sin(t*0.001*s.tw + s.phase));
+      ctx.globalAlpha = Math.max(0.06, a);
+      ctx.fillStyle = s.color;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fill();
+    }
+    for(var j=meteors.length-1;j>=0;j--){
+      var m = meteors[j];
+      m.life += 16;
+      if(m.life >= m.ttl){ meteors.splice(j,1); continue; }
+      var k = m.life/m.ttl;
+      var x = m.x + m.vx*k, y = m.y + m.vy*k;
+      var fade = 1-k, tail = 9;
+      var grad = ctx.createLinearGradient(x,y,x-m.vx*tail,y-m.vy*tail);
+      grad.addColorStop(0,'rgba(243,240,255,'+(0.9*fade)+')');
+      grad.addColorStop(1,'rgba(243,240,255,0)');
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-m.vx*tail,y-m.vy*tail); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+  function spawnMeteor(){
+    var fromLeft = Math.random()>0.5;
+    var ang = (Math.PI/2.6) + Math.random()*(Math.PI/5.5);
+    var dir = fromLeft ? 1 : -1;
+    meteors.push({
+      x: fromLeft ? -30 : canvas.width+30,
+      y: Math.random()*canvas.height*0.42,
+      vx: Math.cos(ang)*dir*7.5,
+      vy: Math.sin(ang)*7.5,
+      life: 0, ttl: 1100
+    });
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  var countdown = 4500;
+  requestAnimationFrame(function frame(t){
+    countdown -= 16;
+    if(countdown <= 0){ spawnMeteor(); countdown = 3500 + Math.random()*4500; }
+    draw(t);
+    requestAnimationFrame(frame);
+  });
+
+  /* ===== 视频播放/暂停 ===== */
+  var film = document.getElementById('film');
+  var inner = document.querySelector('.player-inner');
+  var overlay = document.getElementById('playOverlay');
+  var ppBtn = document.getElementById('ppBtn');
+
+  function setPP(){
+    var paused = film.paused;
+    overlay.classList.toggle('show', paused);
+    ppBtn.classList.toggle('paused', paused);
+    ppBtn.setAttribute('aria-label', paused ? '播放' : '暂停');
+    ppBtn.setAttribute('aria-pressed', String(!paused));
+  }
+  function toggle(){
+    if(film.paused){ film.play(); }
+    else{ film.pause(); }
+  }
+  inner.addEventListener('click', toggle);
+  ppBtn.addEventListener('click', function(e){ e.stopPropagation(); toggle(); });
+  film.addEventListener('play', setPP);
+  film.addEventListener('pause', setPP);
+  film.addEventListener('loadeddata', setPP);
+  setPP();
+
+  /* ===== 进度条（可拖动往后拉） ===== */
+  var seekbar = document.getElementById('seekbar');
+  var seekFill = document.getElementById('seekFill');
+  var seekKnob = document.getElementById('seekKnob');
+  var seekTime = document.getElementById('seekTime');
+  var seeking = false;
+
+  function seekTo(px){
+    if(!film.duration) return;
+    var rect = seekbar.getBoundingClientRect();
+    var r = Math.min(1, Math.max(0, (px - rect.left) / rect.width));
+    film.currentTime = r * film.duration;
+    updateSeek();
+  }
+  function updateSeek(){
+    var d = film.duration || 0, c = film.currentTime || 0;
+    var pct = d ? (c/d*100) : 0;
+    seekFill.style.width = pct + '%';
+    seekKnob.style.left = pct + '%';
+    seekTime.textContent = c.toFixed(1) + ' / ' + d.toFixed(1) + 's';
+    seekbar.setAttribute('aria-valuenow', Math.round(pct));
+  }
+  seekbar.addEventListener('pointerdown', function(e){
+    seeking = true;
+    seekbar.classList.add('drag');
+    seekbar.setPointerCapture(e.pointerId);
+    seekTo(e.clientX);
+  });
+  seekbar.addEventListener('pointermove', function(e){
+    if(seeking) seekTo(e.clientX);
+  });
+  seekbar.addEventListener('pointerup', function(){
+    seeking = false;
+    seekbar.classList.remove('drag');
+  });
+  seekbar.addEventListener('click', function(e){
+    if(!seeking) seekTo(e.clientX);
+  });
+  seekbar.addEventListener('pointercancel', function(){
+    seeking = false;
+    seekbar.classList.remove('drag');
+  });
+  film.addEventListener('timeupdate', updateSeek);
+  film.addEventListener('loadedmetadata', updateSeek);
+  updateSeek();
+
+  /* ===== 背景音乐 ===== */
+  var bgm = document.getElementById('bgm');
+  var musicBtn = document.getElementById('musicBtn');
+  var musicLabel = document.getElementById('musicLabel');
+  var musicStarted = false;
+
+  function setMusicUI(){
+    var playing = !bgm.paused && !bgm.ended;
+    musicBtn.classList.toggle('playing', playing);
+    musicLabel.textContent = playing ? '音乐中' : '开启音乐';
+    musicBtn.setAttribute('aria-label', playing ? '关闭音乐' : '开启音乐');
+  }
+  function startMusic(){
+    if(musicStarted) return;
+    musicStarted = true;
+    var p = bgm.play();
+    if(p && p.catch){ p.catch(function(){}); }
+    setMusicUI();
+  }
+  musicBtn.addEventListener('click', function(){
+    if(musicStarted){ bgm.pause(); setMusicUI(); }
+    else{ startMusic(); }
+  });
+  bgm.addEventListener('play', setMusicUI);
+  bgm.addEventListener('pause', setMusicUI);
+  var once = function(){
+    startMusic();
+    document.removeEventListener('pointerdown', once);
+    document.removeEventListener('keydown', once);
+  };
+  document.addEventListener('pointerdown', once);
+  document.addEventListener('keydown', once);
+  var p0 = bgm.play();
+  if(p0 && p0.catch){ p0.catch(function(){}); }
+})();
+</script>
+</body>
+</html>
